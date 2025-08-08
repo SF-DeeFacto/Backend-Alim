@@ -1,6 +1,10 @@
 spring:
   application:
     name: alim-service
+  redis:
+    host: localhost
+    port: 6379
+    password: StrongPassword22!
 
 server:
   port: 8082
