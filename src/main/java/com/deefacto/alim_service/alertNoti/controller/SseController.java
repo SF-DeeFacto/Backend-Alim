@@ -18,8 +18,9 @@ public class SseController {
     @GetMapping("/subscribe")
     public SseEmitter subscribe(@RequestHeader("X-Employee-Id") String userId,
                                 @RequestHeader("X-Role") String userRole,
-                                @RequestHeader("X-Shift") String userShift) {
-        return sseService.subscribe(userId, userRole, userShift);
+                                @RequestHeader("X-Shift") String userShift,
+                                @RequestHeader(value = "Last-Event-ID", required = false) String lastEventId) {
+        return sseService.subscribe(userId, userRole, userShift, lastEventId);
     }
 }
 

@@ -2,30 +2,34 @@ package com.deefacto.alim_service.alertNoti.service;
 
 import com.deefacto.alim_service.alertNoti.dto.Alert;
 import com.deefacto.alim_service.alertNoti.dto.ConnectedUser;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SseService {
 
-    private final ObjectMapper objectMapper;
+    private final AlertRedisService alertRedisService;
 
     private final Map<String, SseEmitter> emitters = new ConcurrentHashMap<>();
     private final Map<String, ConnectedUser> connectedUsers = new ConcurrentHashMap<>();
 
-    public SseEmitter subscribe(String userId, String userRole, String userShift) {
-        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+    private static final long TIMEOUT = 30 * 60 * 1000L; // 30분
+
+    public SseEmitter subscribe(String userId, String userRole, String userShift, String lastEventId) {
+        SseEmitter emitter = new SseEmitter(TIMEOUT);
         emitters.put(userId, emitter);
 
         Set<String> zoneSet = Arrays.stream(userRole.split(","))
@@ -34,15 +38,37 @@ public class SseService {
 
         connectedUsers.put(userId, new ConnectedUser(userId, zoneSet, userShift));
 
-        emitter.onCompletion(() -> remove(userId));
-        emitter.onTimeout(() -> remove(userId));
-        emitter.onError((e) -> remove(userId));
+        emitter.onCompletion(() -> {
+            remove(userId);
+            log.info("SSE connection completed: userId={}", userId);
+        });
+        emitter.onTimeout(() -> {
+            remove(userId);
+            log.info("SSE connection timeout: userId={}", userId);
+        });
+        emitter.onError((e) -> {
+            remove(userId);
+            log.warn("SSE connection error: userId={}, error={}", userId, e.getMessage());
+        });
 
         try {
             emitter.send(SseEmitter.event().name("connect").data("connected"));
         } catch (IOException e) {
             throw new RuntimeException("SSE 연결 실패", e);
         }
+
+        // 누락 메시지 재전송
+        List<Alert> missedAlerts = alertRedisService.getAlertsAfter(lastEventId);
+        missedAlerts.forEach(alert -> {
+            try {
+                emitter.send(SseEmitter.event()
+                        .id(alert.getId())
+                        .name("alert")
+                        .data(alert));
+            } catch (IOException e) {
+                log.error("Failed to resend alert to userId={}: {}", userId, e.getMessage());
+            }
+        });
 
         return emitter;
     }
@@ -77,7 +103,7 @@ public class SseService {
 
             try {
                 emitters.get(userId).send(
-                        SseEmitter.event().name("alert").data(alert)
+                        SseEmitter.event().id(alert.getId()).name("alert").data(alert)
                 );
             } catch (IOException e) {
                 remove(userId);
