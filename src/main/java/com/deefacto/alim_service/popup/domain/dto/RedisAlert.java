@@ -10,7 +10,7 @@ import java.time.OffsetDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Alert {
+public class RedisAlert {
     private String id;
     private String sensorId;
     private String zoneId;

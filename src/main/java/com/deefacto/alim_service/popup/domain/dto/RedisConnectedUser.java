@@ -9,7 +9,7 @@ import java.util.Set;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ConnectedUser {
+public class RedisConnectedUser {
     private String userId;
     private Set<String> zoneIds;
     private String userShift;

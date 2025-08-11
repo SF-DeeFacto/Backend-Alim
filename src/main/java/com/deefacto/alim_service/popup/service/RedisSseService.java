@@ -1,7 +1,7 @@
 package com.deefacto.alim_service.popup.service;
 
-import com.deefacto.alim_service.popup.domain.dto.Alert;
-import com.deefacto.alim_service.popup.domain.dto.ConnectedUser;
+import com.deefacto.alim_service.popup.domain.dto.RedisAlert;
+import com.deefacto.alim_service.popup.domain.dto.RedisConnectedUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -18,14 +18,14 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class SseService {
+public class RedisSseService {
 
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
 
     // userId → (userRole + emitter)
     private final Map<String, SseEmitter> emitters = new ConcurrentHashMap<>();
-    private final Map<String, ConnectedUser> connectedUsers = new ConcurrentHashMap<>();
+    private final Map<String, RedisConnectedUser> connectedUsers = new ConcurrentHashMap<>();
 
     public SseEmitter subscribe(String userId, String userRole, String userShift) {
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
@@ -35,7 +35,7 @@ public class SseService {
                 .map(String::trim)
                 .collect(Collectors.toSet());
 
-        connectedUsers.put(userId, new ConnectedUser(userId, zoneSet, userShift));
+        connectedUsers.put(userId, new RedisConnectedUser(userId, zoneSet, userShift));
 
         emitter.onCompletion(() -> remove(userId));
         emitter.onTimeout(() -> remove(userId));
@@ -55,11 +55,11 @@ public class SseService {
         connectedUsers.remove(userId);
     }
 
-    public void sendAlert(Alert alert) {
+    public void sendAlert(RedisAlert alert) {
         String alertZone = alert.getZoneId();
 
         for (String userId : emitters.keySet()) {
-            ConnectedUser user = connectedUsers.get(userId);
+            RedisConnectedUser user = connectedUsers.get(userId);
             if (user == null) continue;
 
             // 1. 권한 있는 zone인지 확인

@@ -1,17 +1,16 @@
 package com.deefacto.alim_service.popup.controller;
 
-import com.deefacto.alim_service.popup.service.SseService;
+import com.deefacto.alim_service.popup.service.RedisSseService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/sse")
-public class SseController {
+@RequestMapping("/api/sse/redis")
+public class SseRedisController {
 
-    private final SseService sseService;
+    private final RedisSseService sseService;
 
     @GetMapping("/subscribe")
     public SseEmitter subscribe(@RequestHeader("X-Employee-Id") String userId,

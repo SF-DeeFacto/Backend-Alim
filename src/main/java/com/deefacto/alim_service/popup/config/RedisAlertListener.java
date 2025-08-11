@@ -1,7 +1,7 @@
 package com.deefacto.alim_service.popup.config;
 
-import com.deefacto.alim_service.popup.domain.dto.Alert;
-import com.deefacto.alim_service.popup.service.SseService;
+import com.deefacto.alim_service.popup.domain.dto.RedisAlert;
+import com.deefacto.alim_service.popup.service.RedisSseService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RedisAlertListener {
 
-    private final SseService sseService;
+    private final RedisSseService sseService;
     private final ObjectMapper objectMapper;
 
     @Bean
@@ -24,7 +24,7 @@ public class RedisAlertListener {
         container.addMessageListener((message, pattern) -> {
             try {
                 String alertJson = new String(message.getBody());
-                Alert alert = objectMapper.readValue(alertJson, Alert.class);
+                RedisAlert alert = objectMapper.readValue(alertJson, RedisAlert.class);
                 sseService.sendAlert(alert);
             } catch (Exception e) {
                 // 로그 등 처리

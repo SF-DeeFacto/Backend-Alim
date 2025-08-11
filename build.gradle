@@ -31,6 +31,11 @@ dependencies {
 	implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.10.2'
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 	implementation 'org.opensearch.client:opensearch-java:2.11.1'
+
+	implementation platform('software.amazon.awssdk:bom:2.20.9')
+	implementation 'software.amazon.awssdk:sqs'
+	implementation 'software.amazon.awssdk:regions'
+	
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
