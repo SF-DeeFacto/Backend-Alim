@@ -16,15 +16,8 @@ public class SseController {
     @GetMapping("/subscribe")
     public SseEmitter subscribe(@RequestHeader("X-Employee-Id") String userId,
                                 @RequestHeader("X-Role") String userRole,
-                                @RequestHeader("X-Shift") Character userShift) {
+                                @RequestHeader("X-Shift") String userShift) {
         return sseService.subscribe(userId, userRole, userShift);
-    }
-
-    // 수동 알림 받기
-    @PostMapping("/broadcast")
-    public ResponseEntity<String> broadcastFromRedis() {
-        sseService.broadcastAlertsFromRedis();
-        return ResponseEntity.ok("전송 완료");
     }
 }
 

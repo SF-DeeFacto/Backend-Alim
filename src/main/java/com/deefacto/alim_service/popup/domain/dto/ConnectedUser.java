@@ -12,7 +12,7 @@ import java.util.Set;
 public class ConnectedUser {
     private String userId;
     private Set<String> zoneIds;
-    private Character userShift;
+    private String userShift;
 }
 
 
