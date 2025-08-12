@@ -77,7 +77,7 @@ public class SqsPollingService {
                         alert.setId(UUID.randomUUID().toString());
                     }
 
-                    log.info("Received SQS message: {}", alert);
+                    log.info("!!!!!!!!!!!!!!!!Received SQS message: {}", alert);
 
                     // Redis에 저장
                     alertRedisService.saveAlert(alert);
