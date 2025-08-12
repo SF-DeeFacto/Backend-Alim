@@ -1,4 +1,4 @@
-package com.deefacto.alim_service.alertNoti.dto;
+package com.deefacto.alim_service.alertNoti.domain.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

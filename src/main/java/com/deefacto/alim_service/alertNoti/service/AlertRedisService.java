@@ -1,6 +1,6 @@
 package com.deefacto.alim_service.alertNoti.service;
 
-import com.deefacto.alim_service.alertNoti.dto.Alert;
+import com.deefacto.alim_service.alertNoti.domain.dto.Alert;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;

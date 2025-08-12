@@ -16,11 +16,14 @@ public class AwsConfig {
     @Value("${aws.region}")
     private String region;
 
+    @Value("${aws.sqs.endpoint-url}")
+    private String endpoint;
+
     @Bean
     public SqsClient sqsClient() {
         return SqsClient.builder()
                 .region(Region.of(region))
-                .endpointOverride(URI.create("http://localhost:4566"))  // 로컬 스택 주소
+                .endpointOverride(URI.create(endpoint))  // 로컬 스택 주소
                 .credentialsProvider(StaticCredentialsProvider.create(
                         AwsBasicCredentials.create("test", "test")))
                 .build();
