@@ -1,4 +1,4 @@
-package com.deefacto.alim_service.alertNoti.domain.entity;
+package com.deefacto.alim_service.commonNoti.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.Builder;
