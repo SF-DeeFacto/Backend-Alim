@@ -32,9 +32,4 @@ public class Notification {
 
     @Column(nullable = false)
     private OffsetDateTime timestamp;
-
-    public enum NotiType {
-        REPORT,
-        ALERT
-    }
 }
