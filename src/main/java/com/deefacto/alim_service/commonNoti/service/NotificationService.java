@@ -8,9 +8,13 @@ import com.deefacto.alim_service.commonNoti.repository.NotificationRepository;
 import com.deefacto.alim_service.commonNoti.repository.NotificationUserRepository;
 import com.deefacto.alim_service.remote.service.UserRequestProducer;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
+
 import java.util.Objects;
 
 @Service
@@ -23,8 +27,8 @@ public class NotificationService {
 
     // 알림 리스트 조회: userId, isRead, isFlagged에 따라 조회
     // (isRead, isFlagged Null 경우도 쿼리에서 자동 처리)
-    public List<NotificationReadDTO> getNotificationsForUser(Long userId, Boolean isRead, Boolean isFlagged) {
-        return notificationUserRepository.findNotificationsWithMetaByReadFlagUserId(userId, isRead, isFlagged);
+    public Page<NotificationReadDTO> getNotificationsForUser(Long userId, Boolean isRead, Boolean isFlagged, Pageable pageable) {
+        return notificationUserRepository.findNotificationsWithMetaByReadFlagUserId(userId, isRead, isFlagged, pageable);
     }
 
     // 안읽은 알림 개수 조회: userId에 따라 조회
@@ -32,6 +36,15 @@ public class NotificationService {
         return notificationUserRepository.findNotificationsWithMetaByUserId(userId).size();
     }
 
+    // 알림 읽음 처리
+    public Integer updateReadStatus(Long userId, Long notiId) {
+        return notificationUserRepository.markNotificationAsRead(userId, notiId, OffsetDateTime.now());
+    }
+
+    // 알림 일괄 읽음 처리
+    public Integer updateAllReadStatus(Long userId) {
+        return notificationUserRepository.markNotificationAsRead(userId, null, OffsetDateTime.now());
+    }
 
     // Alert → Notification 변환
     public Notification convertToNotification(Alert alert) {
