@@ -16,11 +16,12 @@ public class SseController {
     private final SseService sseService;
 
     @GetMapping("/subscribe")
-    public SseEmitter subscribe(@RequestHeader("X-Employee-Id") String userId,
+    public SseEmitter subscribe(@RequestHeader("X-Employee-Id") String employeeId,
+                                @RequestHeader("X-User_Id") Long userId,
                                 @RequestHeader("X-Role") String userRole,
                                 @RequestHeader("X-Shift") String userShift,
                                 @RequestHeader(value = "Last-Event-ID", required = false) String lastEventId) {
-        return sseService.subscribe(userId, userRole, userShift, lastEventId);
+        return sseService.subscribe(employeeId, userRole, userShift, lastEventId);
     }
 }
 
