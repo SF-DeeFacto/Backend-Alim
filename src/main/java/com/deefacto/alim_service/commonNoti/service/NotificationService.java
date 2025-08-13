@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 
 import java.util.Objects;
@@ -34,6 +36,10 @@ public class NotificationService {
         return notificationUserRepository.findNotificationsWithMetaByUserId(userId).size();
     }
 
+    // 알림 읽음 처리
+    public Integer updateReadStatus(Long userId, Long notiId) {
+        return notificationUserRepository.markNotificationAsRead(userId, notiId, OffsetDateTime.now());
+    }
 
     // Alert → Notification 변환
     public Notification convertToNotification(Alert alert) {

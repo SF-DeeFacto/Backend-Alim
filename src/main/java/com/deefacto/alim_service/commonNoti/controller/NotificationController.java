@@ -42,7 +42,17 @@ public class NotificationController {
         return ApiResponseDto.createOk(notiCount);
     }
 
+    // 알림 읽음 처리
+    @GetMapping("/read/{notiId}")
+    public ApiResponseDto<Integer> updateReadStatus(@RequestHeader("X-Employee-Id") String employeeId,
+                                                    @RequestHeader("X-User_Id") Long userId,
+                                                    @RequestHeader("X-Role") String userRole,
+                                                    @RequestHeader("X-Shift") String userShift,
+                                                    @PathVariable Long notiId) {
 
+        int update = notificationService.updateReadStatus(userId, notiId);
+        return ApiResponseDto.createOk(update);
+    }
 
     // 알림 일괄 읽음 처리 (😆)
     @GetMapping("/read/all")
