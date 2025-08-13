@@ -5,6 +5,7 @@ import com.deefacto.alim_service.alertNoti.domain.dto.ConnectedUser;
 import com.deefacto.alim_service.commonNoti.domain.entity.Notification;
 import com.deefacto.alim_service.commonNoti.repository.NotificationRepository;
 import com.deefacto.alim_service.commonNoti.service.NotificationService;
+import com.deefacto.alim_service.commonNoti.service.NotificationUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,7 @@ public class SseService {
     private final Map<String, ConnectedUser> connectedUsers = new ConcurrentHashMap<>();
     private final NotificationRepository notificationRepository;
 
-    private final NotificationService notificationService;
+    private final NotificationUserService notificationUserService;
 
     private static final long TIMEOUT = 30 * 60 * 1000L; // 30분
 
@@ -65,7 +66,7 @@ public class SseService {
         List<Alert> missedAlerts = alertRedisService.getAlertsAfter(lastEventId);
         missedAlerts.forEach(alert -> {
             try {
-                Notification notification = notificationService.convertToNotification(alert);
+                Notification notification = notificationUserService.convertToNotification(alert);
                 emitter.send(SseEmitter.event()
                         .id(alert.getId())
                         .name("alert")
@@ -87,8 +88,8 @@ public class SseService {
     public void sendAlert(Alert alert) {
         String alertZone = alert.getZoneId();
 
-        Notification notification = notificationService.convertToNotification(alert);
-        notificationService.saveNotification(notification);
+        Notification notification = notificationUserService.convertToNotification(alert);
+        notificationUserService.saveNotification(notification);
 
         for (String userId : emitters.keySet()) {
             ConnectedUser user = connectedUsers.get(userId);
