@@ -1,16 +1,32 @@
 spring:
   application:
     name: alim-service
+
+  kafka:
+    listener:
+      ack-mode: manual_immediate
+    consumer:
+      group-id: ${spring.application.name}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      enable-auto-commit: false
+      auto-offset-reset: latest
+      max-poll-records: 10
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.use.type.headers: false
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+
   datasource:
-    # 본인 mysql url, username, password 설정하시면 됩니다!!
-    url: jdbc:mysql://127.0.0.1:3307/dee-facto?serverTimezone=UTC&useSSL=true&autoReconnect=true&useUnicode=true&characterEncoding=utf-8
-    username: root
-    password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       connection-test-query: SELECT 1
       validation-timeout: 5000
-      maximum-pool-size: 10  # 추가: 커넥션 풀 크기 설정
+      maximum-pool-size: 10
 
   jpa:
     database-platform: org.hibernate.dialect.MySQL8Dialect
@@ -25,17 +41,10 @@ spring:
         format_sql: true
         use_sql_comments: true
         jdbc:
-          time_zone: UTC  # 타임존 설정 추가
-  redis:
-    host: localhost
-    port: 6379
-    password: StrongPassword22!
+          time_zone: UTC
 
-server:
-  port: 8082
+  redis:
+    port: 6379
 
 aws:
-  region: us-east-1
-  sqs:
-    endpoint-url: http://localhost:4566
-    queue-url: http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/your-queue-name
+  region: ap-northeast-2

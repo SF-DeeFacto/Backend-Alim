@@ -1,0 +1,20 @@
+server:
+  port: 8082
+
+spring:
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3307/dee-facto?serverTimezone=UTC&useSSL=true&autoReconnect=true&useUnicode=true&characterEncoding=utf-8
+    username: root
+    password: 1234
+
+  redis:
+    host: localhost
+    password: StrongPassword22!
+
+  kafka:
+    bootstrap-servers: localhost:9092
+
+aws:
+  sqs:
+    endpoint-url: http://localhost:4566
+    queue-url: http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/your-queue-name

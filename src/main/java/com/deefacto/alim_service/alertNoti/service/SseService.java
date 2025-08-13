@@ -2,8 +2,9 @@ package com.deefacto.alim_service.alertNoti.service;
 
 import com.deefacto.alim_service.alertNoti.domain.dto.Alert;
 import com.deefacto.alim_service.alertNoti.domain.dto.ConnectedUser;
-import com.deefacto.alim_service.alertNoti.domain.entity.Notification;
-import com.deefacto.alim_service.alertNoti.repository.NotificationRepository;
+import com.deefacto.alim_service.commonNoti.domain.entity.Notification;
+import com.deefacto.alim_service.commonNoti.repository.NotificationRepository;
+import com.deefacto.alim_service.commonNoti.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,9 +26,9 @@ public class SseService {
 
     private final Map<String, SseEmitter> emitters = new ConcurrentHashMap<>();
     private final Map<String, ConnectedUser> connectedUsers = new ConcurrentHashMap<>();
-
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final NotificationRepository notificationRepository;
+
+    private final NotificationService notificationService;
 
     private static final long TIMEOUT = 30 * 60 * 1000L; // 30분
 
@@ -64,7 +65,7 @@ public class SseService {
         List<Alert> missedAlerts = alertRedisService.getAlertsAfter(lastEventId);
         missedAlerts.forEach(alert -> {
             try {
-                Notification notification = convertToNotification(alert);
+                Notification notification = notificationService.convertToNotification(alert);
                 emitter.send(SseEmitter.event()
                         .id(alert.getId())
                         .name("alert")
@@ -77,40 +78,17 @@ public class SseService {
         return emitter;
     }
 
-    // Alert → Notification 변환
-    private Notification convertToNotification(Alert alert) {
-        String formattedTime = alert.getTimestamp() != null
-                ? alert.getTimestamp().format(FORMATTER)
-                : "";
-
-        return Notification.builder()
-                .notiType(Notification.NotiType.ALERT)
-                .zoneId(Objects.toString(alert.getZoneId(), ""))
-                .title(String.format("[%s] %s 센서 이상치 초과 알림", formattedTime, Objects.toString(alert.getSensorId(), "")))
-                .content(String.format(
-                        "현재시간 %s<br>%s 구역 %s 타입 센서 %s에서 값 %s%s가 정상 범위를 초과했습니다.",
-                        formattedTime,
-                        Objects.toString(alert.getZoneId(), ""),
-                        Objects.toString(alert.getSensorType(), ""),
-                        Objects.toString(alert.getSensorId(), ""),
-                        Objects.toString(alert.getVal(), ""),
-                        Objects.toString(alert.getUnit(), "")
-                ))
-                .timestamp(alert.getTimestamp())
-                .build();
-    }
-
-
     private void remove(String userId) {
         emitters.remove(userId);
         connectedUsers.remove(userId);
     }
 
+    // DB 적재 (Notification Table) & 팝업 Noti 전송
     public void sendAlert(Alert alert) {
         String alertZone = alert.getZoneId();
 
-        Notification notification = convertToNotification(alert);
-        notificationRepository.save(notification);
+        Notification notification = notificationService.convertToNotification(alert);
+        notificationService.saveNotification(notification);
 
         for (String userId : emitters.keySet()) {
             ConnectedUser user = connectedUsers.get(userId);
