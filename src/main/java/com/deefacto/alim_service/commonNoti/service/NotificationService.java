@@ -41,6 +41,11 @@ public class NotificationService {
         return notificationUserRepository.markNotificationAsRead(userId, notiId, OffsetDateTime.now());
     }
 
+    // 알림 일괄 읽음 처리
+    public Integer updateAllReadStatus(Long userId) {
+        return notificationUserRepository.markNotificationAsRead(userId, null, OffsetDateTime.now());
+    }
+
     // Alert → Notification 변환
     public Notification convertToNotification(Alert alert) {
         String formattedTime = alert.getTimestamp() != null

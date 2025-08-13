@@ -54,13 +54,14 @@ public class NotificationController {
         return ApiResponseDto.createOk(update);
     }
 
-    // 알림 일괄 읽음 처리 (😆)
+    // 알림 일괄 읽음 처리
     @GetMapping("/read/all")
-    public ApiResponseDto<String> readAllNoti(@RequestHeader("X-Employee-Id") String employeeId,
+    public ApiResponseDto<Integer> updateAllReadStatus(@RequestHeader("X-Employee-Id") String employeeId,
                                               @RequestHeader("X-User_Id") Long userId,
                                                @RequestHeader("X-Role") String userRole,
                                                @RequestHeader("X-Shift") String userShift) {
-        return ApiResponseDto.createOk("good");
+        int update = notificationService.updateAllReadStatus(userId);
+        return ApiResponseDto.createOk(update);
     }
 
     // 알림 즐겨찾기/해제 (😆)

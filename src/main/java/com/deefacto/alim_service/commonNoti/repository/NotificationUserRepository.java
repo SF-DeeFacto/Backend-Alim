@@ -51,15 +51,15 @@ public interface NotificationUserRepository extends JpaRepository<NotificationUs
     @Modifying
     @Transactional
     @Query("""
-        UPDATE NotificationUser nu
-        SET nu.readStatus = true,
-            nu.readTime = :readTime
-        WHERE nu.userId = :userId
-          AND nu.notiId = :notiId
-          AND nu.readStatus = false
-    """)
+    UPDATE NotificationUser nu
+    SET nu.readStatus = true,
+        nu.readTime = :readTime
+    WHERE nu.userId = :userId
+      AND (:notiId IS NULL OR nu.notiId = :notiId)
+      AND nu.readStatus = false
+""")
     int markNotificationAsRead(@Param("userId") Long userId,
-                               @Param("notiId") Long notiId,
+                               @Param("notiId") Long notiId,   // null 가능
                                @Param("readTime") OffsetDateTime readTime);
 
 }
