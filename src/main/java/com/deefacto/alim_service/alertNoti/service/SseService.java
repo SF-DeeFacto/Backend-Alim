@@ -65,7 +65,7 @@ public class SseService {
         List<Alert> missedAlerts = alertRedisService.getAlertsAfter(lastEventId);
         missedAlerts.forEach(alert -> {
             try {
-                Notification notification = notificationUserService.convertToNotification(alert);
+                Notification notification = notificationUserService.convertAlertToNotification(alert);
                 emitter.send(SseEmitter.event()
                         .id(alert.getId())
                         .name("alert")
@@ -87,7 +87,7 @@ public class SseService {
     public void sendAlert(Alert alert) {
         String alertZone = alert.getZoneId();
 
-        Notification receivedNoti = notificationUserService.convertToNotification(alert);
+        Notification receivedNoti = notificationUserService.convertAlertToNotification(alert);
         Notification noti = notificationUserService.saveNotification(receivedNoti);
 
         for (String userId : emitters.keySet()) {
