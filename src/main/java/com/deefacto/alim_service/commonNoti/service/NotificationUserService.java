@@ -36,6 +36,7 @@ public class NotificationUserService {
                 .collect(Collectors.toList());
 
         notificationUserRepository.saveAll(notificationUsers);
+        System.out.println("notification_user data stored complete.");
     }
 
     // Alert → Notification 변환
