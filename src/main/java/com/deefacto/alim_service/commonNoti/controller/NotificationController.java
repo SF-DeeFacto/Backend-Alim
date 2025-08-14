@@ -8,8 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/noti")
@@ -17,7 +15,7 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
-    // 알림 리스트 조회: userId, isRead, isFlagged에 따라 조회
+    // 알림 리스트 조회: userId, isRead, isFlagged에 따라 조회 (+ Page)
     // /noti/list?isRead=false&isFlagged=true&page=0&size=10
     @GetMapping("/list")
     public ApiResponseDto<Page<NotificationReadDTO>> getNotificationsForUser(@RequestHeader("X-Employee-Id") String employeeId,
@@ -64,17 +62,14 @@ public class NotificationController {
         return ApiResponseDto.createOk(update);
     }
 
-    // 알림 즐겨찾기/해제 (😆)
-    /*
-    "notiId": 123,
-	  "isFlagged": true
-    * */
-    @GetMapping("/favorite")
-    public ApiResponseDto<String> favorite(@RequestHeader("X-Employee-Id") String employeeId,
-                                           @RequestHeader("X-User_Id") Long userId,
-                                           @RequestHeader("X-Role") String userRole,
-                                           @RequestHeader("X-Shift") String userShift) {
-        return ApiResponseDto.createOk("good");
+    // 알림 즐겨찾기/해제
+    @GetMapping("/favorite/{notiId}")
+    public ApiResponseDto<Integer> toggleNotificationFlag(@RequestHeader("X-Employee-Id") String employeeId,
+                                                          @RequestHeader("X-User_Id") Long userId,
+                                                          @RequestHeader("X-Role") String userRole,
+                                                          @RequestHeader("X-Shift") String userShift,
+                                                          @PathVariable Long notiId) {
+        int updated = notificationService.toggleNotificationFlag(userId, notiId);
+        return ApiResponseDto.createOk(updated);
     }
-
 }

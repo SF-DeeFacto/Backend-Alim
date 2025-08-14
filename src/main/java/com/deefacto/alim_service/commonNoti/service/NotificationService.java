@@ -1,9 +1,6 @@
 package com.deefacto.alim_service.commonNoti.service;
 
-import com.deefacto.alim_service.alertNoti.domain.dto.Alert;
 import com.deefacto.alim_service.commonNoti.domain.dto.NotificationReadDTO;
-import com.deefacto.alim_service.commonNoti.domain.entity.NotiType;
-import com.deefacto.alim_service.commonNoti.domain.entity.Notification;
 import com.deefacto.alim_service.commonNoti.repository.NotificationRepository;
 import com.deefacto.alim_service.commonNoti.repository.NotificationUserRepository;
 import com.deefacto.alim_service.remote.service.UserRequestProducer;
@@ -14,8 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -46,4 +41,12 @@ public class NotificationService {
         return notificationUserRepository.markNotificationAsRead(userId, null, OffsetDateTime.now());
     }
 
+    // 알림 즐겨찾기/해제
+    public int toggleNotificationFlag(Long userId, Long notiId) {
+        int updatedRows = notificationUserRepository.toggleFlagStatus(userId, notiId);
+        if (updatedRows == 0) {
+            throw new IllegalArgumentException("해당 알림이 존재하지 않거나 이미 처리되었습니다. (잘못된 notiId)");
+        }
+        return updatedRows;
+    }
 }
