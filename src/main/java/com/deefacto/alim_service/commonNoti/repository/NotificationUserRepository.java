@@ -12,8 +12,11 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface NotificationUserRepository extends JpaRepository<NotificationUser, Long> {
+
+    Optional<NotificationUser> findByUserIdAndNotiId(Long userId, Long notiId);
 
     // 알림 리스트 조회
     @Query("""

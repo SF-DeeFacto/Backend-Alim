@@ -4,7 +4,6 @@ import com.deefacto.alim_service.alertNoti.domain.dto.Alert;
 import com.deefacto.alim_service.alertNoti.domain.dto.ConnectedUser;
 import com.deefacto.alim_service.commonNoti.domain.entity.Notification;
 import com.deefacto.alim_service.commonNoti.repository.NotificationRepository;
-import com.deefacto.alim_service.commonNoti.service.NotificationService;
 import com.deefacto.alim_service.commonNoti.service.NotificationUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -88,14 +87,14 @@ public class SseService {
     public void sendAlert(Alert alert) {
         String alertZone = alert.getZoneId();
 
-        Notification notification = notificationUserService.convertToNotification(alert);
-        notificationUserService.saveNotification(notification);
+        Notification receivedNoti = notificationUserService.convertToNotification(alert);
+        Notification noti = notificationUserService.saveNotification(receivedNoti);
 
         for (String userId : emitters.keySet()) {
             ConnectedUser user = connectedUsers.get(userId);
             if (user == null) continue;
 
-            if (!user.getZoneIds().contains(alertZone)) continue;
+            if (!user.getZoneIds().contains(String.valueOf(alertZone.charAt(0)))) continue;
 
             OffsetDateTime alertTime = alert.getTimestamp();
             String shift = user.getUserShift();
@@ -113,7 +112,7 @@ public class SseService {
 
             try {
                 emitters.get(userId).send(
-                        SseEmitter.event().id(alert.getId()).name("alert").data(notification)
+                        SseEmitter.event().id(alert.getId()).name("alert").data(noti)
                 );
             } catch (IOException e) {
                 remove(userId);

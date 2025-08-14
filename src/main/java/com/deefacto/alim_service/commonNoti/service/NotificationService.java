@@ -1,5 +1,7 @@
 package com.deefacto.alim_service.commonNoti.service;
 
+import com.deefacto.alim_service.common.exception.CustomException;
+import com.deefacto.alim_service.common.exception.ErrorCode;
 import com.deefacto.alim_service.commonNoti.domain.dto.NotificationReadDTO;
 import com.deefacto.alim_service.commonNoti.repository.NotificationRepository;
 import com.deefacto.alim_service.commonNoti.repository.NotificationUserRepository;
@@ -31,8 +33,12 @@ public class NotificationService {
         return notificationUserRepository.findNotificationsWithMetaByUserId(userId).size();
     }
 
-    // 알림 읽음 처리
+    // 알림 읽음 처리 (단건)
     public Integer updateReadStatus(Long userId, Long notiId) {
+        // 1. 존재 여부 및 권한 확인
+        notificationUserRepository.findByUserIdAndNotiId(userId, notiId)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_INPUT));
+        // 2. 읽음 처리
         return notificationUserRepository.markNotificationAsRead(userId, notiId, OffsetDateTime.now());
     }
 
@@ -45,7 +51,8 @@ public class NotificationService {
     public int toggleNotificationFlag(Long userId, Long notiId) {
         int updatedRows = notificationUserRepository.toggleFlagStatus(userId, notiId);
         if (updatedRows == 0) {
-            throw new IllegalArgumentException("해당 알림이 존재하지 않거나 이미 처리되었습니다. (잘못된 notiId)");
+            System.out.println("잘못된 요청입니다. (userId - notiId)");
+            throw new CustomException(ErrorCode.INVALID_INPUT);
         }
         return updatedRows;
     }
