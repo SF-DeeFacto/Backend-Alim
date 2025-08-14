@@ -1,6 +1,6 @@
 spring:
   application:
-    name: alim-service
+    name: notification-service
 
   kafka:
     listener:

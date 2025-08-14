@@ -10,14 +10,14 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/sse")
+@RequestMapping("/noti/sse")
 public class SseController {
 
     private final SseService sseService;
 
     @GetMapping("/subscribe")
     public SseEmitter subscribe(@RequestHeader("X-Employee-Id") String employeeId,
-                                @RequestHeader("X-User_Id") Long userId,
+                                @RequestHeader("X-User-Id") Long userId,
                                 @RequestHeader("X-Role") String userRole,
                                 @RequestHeader("X-Shift") String userShift,
                                 @RequestHeader(value = "Last-Event-ID", required = false) String lastEventId) {
