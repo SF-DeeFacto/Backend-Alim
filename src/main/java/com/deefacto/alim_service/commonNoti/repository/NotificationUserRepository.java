@@ -48,6 +48,7 @@ public interface NotificationUserRepository extends JpaRepository<NotificationUs
     """)
     List<NotificationReadDTO> findNotificationsWithMetaByUserId(@Param("userId") Long userId);
 
+    // 알림 읽음 처리 (단건, 다건)
     @Modifying
     @Transactional
     @Query("""
@@ -62,5 +63,15 @@ public interface NotificationUserRepository extends JpaRepository<NotificationUs
                                @Param("notiId") Long notiId,   // null 가능
                                @Param("readTime") OffsetDateTime readTime);
 
+    // 알림 즐겨찾기/해제
+    @Modifying
+    @Transactional
+    @Query("""
+        UPDATE NotificationUser nu
+        SET nu.flagStatus = CASE WHEN nu.flagStatus = true THEN false ELSE true END
+        WHERE nu.userId = :userId AND nu.notiId = :notiId
+    """)
+    int toggleFlagStatus(@Param("userId") Long userId,
+                         @Param("notiId") Long notiId);
 }
 
