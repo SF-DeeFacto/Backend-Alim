@@ -1,6 +1,8 @@
 package com.deefacto.alim_service.alertNoti.controller;
 
+import com.deefacto.alim_service.alertNoti.domain.dto.UserCacheDto;
 import com.deefacto.alim_service.alertNoti.service.SseService;
+import com.deefacto.alim_service.alertNoti.service.UserRedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -14,14 +16,14 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class SseController {
 
     private final SseService sseService;
+    private final UserRedisService userRedisService;
 
     @GetMapping("/subscribe")
     public SseEmitter subscribe(@RequestHeader("X-Employee-Id") String employeeId,
                                 @RequestHeader("X-User-Id") Long userId,
-                                @RequestHeader("X-Role") String userRole,
-                                @RequestHeader("X-Shift") String userShift,
                                 @RequestHeader(value = "Last-Event-ID", required = false) String lastEventId) {
-        return sseService.subscribe(employeeId, userRole, userShift, lastEventId);
+        UserCacheDto userInfo = userRedisService.getUserInfo(employeeId);
+        return sseService.subscribe(employeeId, userInfo.getScope(), userInfo.getShift(), lastEventId);
     }
 }
 

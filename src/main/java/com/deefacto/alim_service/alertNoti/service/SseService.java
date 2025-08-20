@@ -12,7 +12,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -32,11 +31,11 @@ public class SseService {
 
     private static final long TIMEOUT = 30 * 60 * 1000L; // 30분
 
-    public SseEmitter subscribe(String userId, String userRole, String userShift, String lastEventId) {
+    public SseEmitter subscribe(String userId, String userScope, String userShift, String lastEventId) {
         SseEmitter emitter = new SseEmitter(TIMEOUT);
         emitters.put(userId, emitter);
 
-        Set<String> zoneSet = Arrays.stream(userRole.split(","))
+        Set<String> zoneSet = Arrays.stream(userScope.split(","))
                 .map(String::trim)
                 .collect(Collectors.toSet());
 
@@ -63,17 +62,7 @@ public class SseService {
 
         // 누락 메시지 재전송
         List<Alert> missedAlerts = alertRedisService.getAlertsAfter(lastEventId);
-        missedAlerts.forEach(alert -> {
-            try {
-                Notification notification = notificationUserService.convertAlertToNotification(alert);
-                emitter.send(SseEmitter.event()
-                        .id(alert.getId())
-                        .name("alert")
-                        .data(notification));
-            } catch (IOException e) {
-                log.error("Failed to resend alert to userId={}: {}", userId, e.getMessage());
-            }
-        });
+        missedAlerts.forEach(alert -> sendAlert(alert)); // sendAlert 메소드 재사용
 
         return emitter;
     }
@@ -102,9 +91,9 @@ public class SseService {
 
             boolean isWithinShift = false;
 
-            if ("A".equalsIgnoreCase(shift)) {
+            if ("DAY".equalsIgnoreCase(shift)) {
                 isWithinShift = hour >= 7 && hour < 19;
-            } else if ("B".equalsIgnoreCase(shift)) {
+            } else if ("NIGHT".equalsIgnoreCase(shift)) {
                 isWithinShift = hour >= 19 || hour < 7;
             }
 

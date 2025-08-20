@@ -20,11 +20,10 @@ public class NotificationController {
     @GetMapping("/list")
     public ApiResponseDto<Page<NotificationReadDTO>> getNotificationsForUser(@RequestHeader("X-Employee-Id") String employeeId,
                                                @RequestHeader("X-User-Id") Long userId,
-                                                @RequestHeader("X-Role") String userRole,
-                                                @RequestHeader("X-Shift") String userShift,
                                                 @RequestParam(required = false) Boolean isRead,
                                                 @RequestParam(required = false) Boolean isFlagged,
-                                                Pageable pageable) {
+                                                Pageable pageable
+    ) {
         Page<NotificationReadDTO> notificationList = notificationService.getNotificationsForUser(userId, isRead, isFlagged, pageable);
         return ApiResponseDto.createOk(notificationList);
     }
@@ -33,9 +32,8 @@ public class NotificationController {
     // "noti_count": 21
     @GetMapping("/count")
     public ApiResponseDto<Integer> getUnreadNotiCountForUser(@RequestHeader("X-Employee-Id") String employeeId,
-                                            @RequestHeader("X-User-Id") Long userId,
-                                           @RequestHeader("X-Role") String userRole,
-                                           @RequestHeader("X-Shift") String userShift) {
+                                                            @RequestHeader("X-User-Id") Long userId
+    ) {
         Integer notiCount = notificationService.getUnreadNotiCountForUser(userId);
         return ApiResponseDto.createOk(notiCount);
     }
@@ -44,9 +42,8 @@ public class NotificationController {
     @GetMapping("/read/{notiId}")
     public ApiResponseDto<Integer> updateReadStatus(@RequestHeader("X-Employee-Id") String employeeId,
                                                     @RequestHeader("X-User-Id") Long userId,
-                                                    @RequestHeader("X-Role") String userRole,
-                                                    @RequestHeader("X-Shift") String userShift,
-                                                    @PathVariable Long notiId) {
+                                                    @PathVariable Long notiId
+    ) {
 
         int update = notificationService.updateReadStatus(userId, notiId);
         return ApiResponseDto.createOk(update);
@@ -55,9 +52,8 @@ public class NotificationController {
     // 알림 일괄 읽음 처리
     @GetMapping("/read/all")
     public ApiResponseDto<Integer> updateAllReadStatus(@RequestHeader("X-Employee-Id") String employeeId,
-                                              @RequestHeader("X-User-Id") Long userId,
-                                               @RequestHeader("X-Role") String userRole,
-                                               @RequestHeader("X-Shift") String userShift) {
+                                              @RequestHeader("X-User-Id") Long userId
+    ) {
         int update = notificationService.updateAllReadStatus(userId);
         return ApiResponseDto.createOk(update);
     }
@@ -66,9 +62,8 @@ public class NotificationController {
     @GetMapping("/favorite/{notiId}")
     public ApiResponseDto<Integer> toggleNotificationFlag(@RequestHeader("X-Employee-Id") String employeeId,
                                                           @RequestHeader("X-User-Id") Long userId,
-                                                          @RequestHeader("X-Role") String userRole,
-                                                          @RequestHeader("X-Shift") String userShift,
-                                                          @PathVariable Long notiId) {
+                                                          @PathVariable Long notiId
+    ) {
         int updated = notificationService.toggleNotificationFlag(userId, notiId);
         return ApiResponseDto.createOk(updated);
     }
