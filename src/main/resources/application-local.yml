@@ -8,6 +8,7 @@ spring:
     password: 1234
 
   redis:
+    port: 6379
     host: localhost
     password: StrongPassword22!
 
@@ -15,6 +16,7 @@ spring:
     bootstrap-servers: localhost:9092
 
 aws:
+  region: ap-northeast-2
   sqs:
     endpoint-url: http://localhost:4566
     queue-url: http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/your-queue-name
