@@ -72,9 +72,9 @@ public class NotificationUserService {
         int hour = notification.getTimestamp().getHour();
         String shift = "None";
         if(hour >= 7 && hour < 19) {
-            shift = "A";
+            shift = "DAY";
         } else if (hour >= 19 || hour < 7){
-            shift = "B";
+            shift = "NIGHT";
         }
 
         Notification result = notificationRepository.save(notification);

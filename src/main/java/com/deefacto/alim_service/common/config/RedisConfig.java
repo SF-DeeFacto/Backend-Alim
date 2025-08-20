@@ -57,16 +57,5 @@ public class RedisConfig {
         template.afterPropertiesSet();
         return template;
     }
-
-
-//    // 문자열 전용 RedisTemplate (필요 시 활성화)
-//    @Bean
-//    public RedisTemplate<String, String> stringRedisTemplate(RedisConnectionFactory connectionFactory) {
-//        RedisTemplate<String, String> template = new RedisTemplate<>();
-//        template.setConnectionFactory(connectionFactory);
-//        template.setKeySerializer(new StringRedisSerializer());
-//        template.setValueSerializer(new StringRedisSerializer());
-//        return template;
-//    }
 }
 

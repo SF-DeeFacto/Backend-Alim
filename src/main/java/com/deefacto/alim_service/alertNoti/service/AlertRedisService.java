@@ -21,11 +21,11 @@ public class AlertRedisService {
 
     public void saveAlert(Alert alert) {
         String key = KEY_PREFIX + alert.getId();
-//        redisTemplate.opsForValue().set(key, alert, Duration.ofHours(1));
         redisTemplate.opsForValue().set(key, alert, Duration.ofMinutes(5));
 
     }
 
+    // 누락 메시지 재전송
     public List<Alert> getAlertsAfter(String lastEventId) {
         Set<String> keys = redisTemplate.keys(KEY_PREFIX + "*");
         if (keys == null || keys.isEmpty()) {
