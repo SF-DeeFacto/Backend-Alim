@@ -63,4 +63,3 @@ EXPOSE 8082
 
 # 애플리케이션 실행
 ENTRYPOINT ["java", "-jar", "app.jar"]
-

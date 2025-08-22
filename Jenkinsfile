@@ -7,17 +7,17 @@ pipeline {
     agent any
 
     parameters {
-        gitParameter branch: '',
-                    branchFilter: '.*',
-                    defaultValue: 'origin/dev',
-                    description: '빌드할 Git 브랜치 또는 태그를 선택하세요.',
-                    listSize: '0',
-                    name: 'TAG',
-                    quickFilterEnabled: false,
-                    selectedValue: 'DEFAULT',
-                    sortMode: 'DESCENDING_SMART',
-                    tagFilter: '*',
-                    type: 'PT_BRANCH_TAG'
+//         gitParameter branch: '',
+//                     branchFilter: '.*',
+//                     defaultValue: 'origin/dev',
+//                     description: '빌드할 Git 브랜치 또는 태그를 선택하세요.',
+//                     listSize: '0',
+//                     name: 'TAG',
+//                     quickFilterEnabled: false,
+//                     selectedValue: 'DEFAULT',
+//                     sortMode: 'DESCENDING_SMART',
+//                     tagFilter: '*',
+//                     type: 'PT_BRANCH_TAG'
 
         booleanParam defaultValue: false, description: '릴리스 빌드 여부 (Docker 이미지에 -RELEASE 태그 추가)', name: 'RELEASE'
     }
@@ -38,22 +38,27 @@ pipeline {
 
         stage('Checkout Source Code') {
             steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: "${params.TAG.replace('origin/', '')}"]],
-                    doGenerateSubmoduleConfigurations: false,
-                    extensions: [],
-                    submoduleCfg: [],
-                    userRemoteConfigs: [[url: "${GIT_URL}"]]
-                ])
+                script {
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: "refs/tags/*"]], // 태그 감지
+                        doGenerateSubmoduleConfigurations: false,
+                        extensions: [],
+                        submoduleCfg: [],
+                        userRemoteConfigs: [[
+                            url: "${GIT_URL}",
+                            refspec: "+refs/tags/*:refs/tags/*" // 태그 가져오기
+                        ]]
+                    ])
+                }
             }
         }
 
         stage('Set Version & Docker Image Name') {
             steps {
                 script {
-                    def versionFromTag = params.TAG.replace('origin/', '').trim()
-                    APP_VERSION = "${versionFromTag}"
+//                     def versionFromTag = params.TAG.replace('origin/', '').trim()
+                    APP_VERSION = sh(script: "git describe --tags --abbrev=0", returnStdout: true).trim()
 
                     if (params.RELEASE) {
                         APP_VERSION += '-RELEASE'
