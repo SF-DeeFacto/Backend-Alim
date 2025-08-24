@@ -28,7 +28,7 @@ public class SseController {
                                 @RequestHeader(value = "Last-Event-ID", required = false) String lastEventId) {
         // API Gateway에서 전달받은 헤더 검증
         if (userId == null || employeeId == null || employeeId.isEmpty()) {
-            log.warn("[회원 프로필]: 잘못된 파라미터 userId: {}, employeeId: {}", userId, employeeId);
+            log.warn("[팝업 알림 구독]: 잘못된 파라미터 userId: {}, employeeId: {}", userId, employeeId);
             throw new CustomException(ErrorCode.INVALID_TOKEN, "X-User-Id, X-Employee-Id header is required");
         }
         UserCacheDto userInfo = userRedisService.getUserInfo(employeeId);
