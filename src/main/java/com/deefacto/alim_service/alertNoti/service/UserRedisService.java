@@ -23,7 +23,7 @@ public class UserRedisService {
         Object obj = redisTemplate.opsForValue().get(key);
         UserCacheDto userInfo = objectMapper.convertValue(obj, UserCacheDto.class);
         if(userInfo == null) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED);
+            throw new CustomException(ErrorCode.USER_NOT_FOUND_IN_TOKEN, "토큰에 해당하는 사용자가 메모리에 존재하지 않습니다.");
         }
         return userInfo;
     }
