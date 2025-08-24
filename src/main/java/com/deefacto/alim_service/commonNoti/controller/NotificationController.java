@@ -6,6 +6,7 @@ import com.deefacto.alim_service.commonNoti.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,10 +23,10 @@ public class NotificationController {
                                                @RequestHeader("X-User-Id") Long userId,
                                                 @RequestParam(required = false) Boolean isRead,
                                                 @RequestParam(required = false) Boolean isFlagged,
-                                                Pageable pageable
+                                                @PageableDefault(page = 0, size = 10) Pageable pageable
     ) {
         Page<NotificationReadDTO> notificationList = notificationService.getNotificationsForUser(userId, isRead, isFlagged, pageable);
-        return ApiResponseDto.createOk(notificationList);
+        return ApiResponseDto.createOk(notificationList, "알림 리스트 조회 성공");
     }
 
     // 안읽은 알림 개수 조회: userId에 따라 조회
@@ -35,7 +36,7 @@ public class NotificationController {
                                                             @RequestHeader("X-User-Id") Long userId
     ) {
         Integer notiCount = notificationService.getUnreadNotiCountForUser(userId);
-        return ApiResponseDto.createOk(notiCount);
+        return ApiResponseDto.createOk(notiCount, "안읽은 알림 개수 조회 성공");
     }
 
     // 알림 읽음 처리
@@ -46,7 +47,7 @@ public class NotificationController {
     ) {
 
         int update = notificationService.updateReadStatus(userId, notiId);
-        return ApiResponseDto.createOk(update);
+        return ApiResponseDto.createOk(update, "알림 읽음 처리 성공");
     }
 
     // 알림 일괄 읽음 처리
@@ -55,7 +56,7 @@ public class NotificationController {
                                               @RequestHeader("X-User-Id") Long userId
     ) {
         int update = notificationService.updateAllReadStatus(userId);
-        return ApiResponseDto.createOk(update);
+        return ApiResponseDto.createOk(update, "알림 일괄 읽음 처리 성공");
     }
 
     // 알림 즐겨찾기/해제
@@ -65,6 +66,6 @@ public class NotificationController {
                                                           @PathVariable Long notiId
     ) {
         int updated = notificationService.toggleNotificationFlag(userId, notiId);
-        return ApiResponseDto.createOk(updated);
+        return ApiResponseDto.createOk(updated, "알림 즐겨찾기/해제 성공");
     }
 }
