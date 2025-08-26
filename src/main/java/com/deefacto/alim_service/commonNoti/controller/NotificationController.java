@@ -84,7 +84,7 @@ public class NotificationController {
 
     // 알림 즐겨찾기/해제
     @PostMapping("/favorite/{notiId}")
-    public ApiResponseDto<Integer> toggleNotificationFlag(@RequestHeader("X-Employee-Id") String employeeId,
+    public ApiResponseDto<Boolean> toggleNotificationFlag(@RequestHeader("X-Employee-Id") String employeeId,
                                                           @RequestHeader("X-User-Id") Long userId,
                                                           @PathVariable Long notiId
     ) {
@@ -93,7 +93,7 @@ public class NotificationController {
             log.warn("[알림 즐겨찾기/해제]: 잘못된 파라미터 userId: {}, employeeId: {}", userId, employeeId);
             throw new CustomException(ErrorCode.INVALID_TOKEN, "X-User-Id, X-Employee-Id header is required");
         }
-        int updated = notificationService.toggleNotificationFlag(userId, notiId);
+        boolean updated = notificationService.toggleNotificationFlag(userId, notiId);
         return ApiResponseDto.createOk(updated, "알림 즐겨찾기/해제 성공");
     }
 }
