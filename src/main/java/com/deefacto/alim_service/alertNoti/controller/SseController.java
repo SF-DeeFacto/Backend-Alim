@@ -34,5 +34,10 @@ public class SseController {
         UserCacheDto userInfo = userRedisService.getUserInfo(employeeId);
         return sseService.subscribe(employeeId, userInfo.getScope(), userInfo.getShift(), lastEventId);
     }
+
+    @GetMapping(value = "/test")
+    public String test() {
+        return "test";
+    }
 }
 

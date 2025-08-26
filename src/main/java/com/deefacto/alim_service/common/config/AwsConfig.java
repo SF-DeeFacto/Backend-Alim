@@ -28,4 +28,7 @@ public class AwsConfig {
                         AwsBasicCredentials.create("test", "test")))
                 .build();
     }
+
+
+//주석 추가 -> jenkins 인식 테스트
 }
