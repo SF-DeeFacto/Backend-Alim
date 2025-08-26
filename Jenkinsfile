@@ -11,9 +11,9 @@ pipeline {
     }
 
     environment {
-        GIT_URL = "git@github.com:SF-DeeFacto/Backend-AI.git"
+        GIT_URL = "git@github.com:SF-DeeFacto/Backend-Alim.git" // SSH URL 사용
         AWS_CREDENTIALS = 'jenkins-ecr'
-        credentials: ['jenkins-github-key']
+        SSH_KEY_ID = 'jenkins-github-key' // [변경] sshagent에서 사용할 Credential ID
     }
 
     options {
@@ -23,17 +23,21 @@ pipeline {
         retry(2)
     }
 
-    stages{
+    stages {
 
-         stage('Checkout Source Code') {
+        stage('Checkout Source Code') {
             steps {
                 sshagent(credentials: [env.SSH_KEY_ID]) { // [변경] SSH 키로 인증
                     checkout([
                         $class: 'GitSCM',
-                        branches: [[name: "*/dev"]], // [변경] dev 브랜치만 감지
+                        branches: [[name: "origin/dev"]], // [변경] origin/dev 명시
                         doGenerateSubmoduleConfigurations: false,
                         extensions: [],
-                        userRemoteConfigs: [[url: "${GIT_URL}"]]
+                        userRemoteConfigs: [[
+                            url: "${GIT_URL}",
+                            // [변경] 최신 태그까지 가져오기
+                            refspec: "+refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*"
+                        ]]
                     ])
                 }
             }
@@ -42,7 +46,9 @@ pipeline {
         stage('Set Version & Docker Image Name') {
             steps {
                 script {
-                    // [변경] 최신 태그 자동 계산
+                    // [변경] 최신 태그 fetch 후 자동 버전 증가
+                    sh "git fetch --tags"
+
                     def lastTag = sh(script: "git describe --tags --abbrev=0 || echo v1.0.0", returnStdout: true).trim()
                     def (major, minor, patch) = lastTag.replace('v','').tokenize('.')
                     patch = (patch as int) + 1
@@ -53,7 +59,7 @@ pipeline {
                         PROD_BUILD = true
                     }
 
-                    // [변경] 새로운 태그 생성 및 푸시
+                    // [변경] Jenkins에서 태그 생성 및 원격 푸시
                     sshagent(credentials: [env.SSH_KEY_ID]) {
                         sh """
                             git config user.name "jenkins"
@@ -63,6 +69,7 @@ pipeline {
                         """
                     }
 
+                    // [변경] 환경 파일 읽기
                     withCredentials([file(credentialsId: 'deefacto-Alim-service-env', variable: 'ENV_FILE')]) {
                         def props = readProperties file: ENV_FILE
                         env.ECR_REPOSITORY = props.ECR_REPOSITORY
@@ -80,7 +87,6 @@ pipeline {
             }
         }
 
-
         stage('Login to ECR') {
             steps {
                 script {
@@ -94,6 +100,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
+                    // [중요] Dockerfile이 workspace에 반드시 존재해야 함
                     docker.build("${DOCKER_IMAGE_NAME}", "--build-arg APP_NAME=${APP_NAME} .")
                 }
             }

@@ -37,7 +37,7 @@ public class SseController {
 
     @GetMapping(value = "/test")
     public String test() {
-        return "test ssh key update";
+        return "test ssh key update 232656";
     }
 }
 
