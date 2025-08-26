@@ -17,7 +17,9 @@ public class Alert {
     private String sensorId;
     @JsonProperty("zone_id")
     private String zoneId;
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX")
+    // 🔥 Local SQS 사용 시
+    // @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssX")
     private OffsetDateTime timestamp;
     @JsonProperty("sensor_type")
     private String sensorType;

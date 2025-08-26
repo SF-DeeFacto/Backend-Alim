@@ -3,6 +3,7 @@ package com.deefacto.alim_service.commonNoti.service;
 import com.deefacto.alim_service.common.exception.CustomException;
 import com.deefacto.alim_service.common.exception.ErrorCode;
 import com.deefacto.alim_service.commonNoti.domain.dto.NotificationReadDTO;
+import com.deefacto.alim_service.commonNoti.domain.entity.NotificationUser;
 import com.deefacto.alim_service.commonNoti.repository.NotificationRepository;
 import com.deefacto.alim_service.commonNoti.repository.NotificationUserRepository;
 import com.deefacto.alim_service.remote.service.UserRequestProducer;
@@ -50,12 +51,15 @@ public class NotificationService {
     }
 
     // 알림 즐겨찾기/해제
-    public int toggleNotificationFlag(Long userId, Long notiId) {
+    public boolean toggleNotificationFlag(Long userId, Long notiId) {
         int updatedRows = notificationUserRepository.toggleFlagStatus(userId, notiId);
         if (updatedRows == 0) {
             log.warn("잘못된 요청입니다. (userId - notiId)");
             throw new CustomException(ErrorCode.INVALID_INPUT, "잘못된 요청입니다. Wrong notiId");
+        } else {
+            NotificationUser nu = notificationUserRepository.findByUserIdAndNotiId(userId, notiId)
+                    .orElseThrow(() -> new CustomException(ErrorCode.INVALID_INPUT, "잘못된 요청입니다. Wrong notiId"));
+            return nu.getFlagStatus();
         }
-        return updatedRows;
     }
 }
