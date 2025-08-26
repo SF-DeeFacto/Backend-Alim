@@ -44,7 +44,11 @@ spring:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
 
 aws:
+  credentials:
+    access-key: ${AWS_ACCESS_KEY:test}
+    secret-key: ${AWS_SECRET_KEY:test}
   region: ${AWS_REGION:ap-northeast-2}
   sqs:
-    endpoint-url: ${AWS_SQS_ENDPOINT_URL:http://localhost:4566}
+#  🔥 Local SQS 사용 시
+#    endpoint-url: ${AWS_SQS_ENDPOINT_URL:http://localhost:4566}
     queue-url: ${AWS_SQS_QUEUE_URL:http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/your-queue-name}

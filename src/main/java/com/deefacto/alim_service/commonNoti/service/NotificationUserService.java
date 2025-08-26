@@ -87,6 +87,7 @@ public class NotificationUserService {
     // 알림과 대상 사용자 리스트를 받아 각각 알림-사용자 row를 생성
     // kafka(user) consumer에서 호출됨
     public void assignNotificationToUsers(Long notificationId, List<Long> userIds) {
+        log.info("userId size: {}", userIds.size());
         List<NotificationUser> notificationUsers = userIds.stream()
                 .map(userId -> NotificationUser.builder()
                         .notiId(notificationId)
