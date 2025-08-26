@@ -11,9 +11,9 @@ pipeline {
     }
 
     environment {
-        GIT_URL = "https://github.com/SF-DeeFacto/Backend-Alim.git"
+        GIT_URL = "git@github.com:SF-DeeFacto/Backend-AI.git"
         AWS_CREDENTIALS = 'jenkins-ecr'
-        SSH_KEY_ID = 'jenkins-github-key'
+        credentials: ['jenkins-github-key']
     }
 
     options {
