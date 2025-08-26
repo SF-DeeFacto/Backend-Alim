@@ -13,6 +13,7 @@ pipeline {
     environment {
         GIT_URL = "https://github.com/SF-DeeFacto/Backend-Alim.git"
         AWS_CREDENTIALS = 'jenkins-ecr'
+        SSH_KEY_ID = 'jenkins-github-key'
     }
 
     options {
@@ -35,6 +36,7 @@ pipeline {
                         userRemoteConfigs: [[url: "${GIT_URL}"]]
                     ])
                 }
+            }
         }
 
         stage('Set Version & Docker Image Name') {
