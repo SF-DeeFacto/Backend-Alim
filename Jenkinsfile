@@ -7,18 +7,6 @@ pipeline {
     agent any
 
     parameters {
-//         gitParameter branch: '',
-//                     branchFilter: '.*',
-//                     defaultValue: 'origin/dev',
-//                     description: '빌드할 Git 브랜치 또는 태그를 선택하세요.',
-//                     listSize: '0',
-//                     name: 'TAG',
-//                     quickFilterEnabled: false,
-//                     selectedValue: 'DEFAULT',
-//                     sortMode: 'DESCENDING_SMART',
-//                     tagFilter: '*',
-//                     type: 'PT_BRANCH_TAG'
-
         booleanParam defaultValue: false, description: '릴리스 빌드 여부 (Docker 이미지에 -RELEASE 태그 추가)', name: 'RELEASE'
     }
 
@@ -36,33 +24,41 @@ pipeline {
 
     stages{
 
-        stage('Checkout Source Code') {
+         stage('Checkout Source Code') {
             steps {
-                script {
+                sshagent(credentials: [env.SSH_KEY_ID]) { // [변경] SSH 키로 인증
                     checkout([
                         $class: 'GitSCM',
-                        branches: [[name: "refs/tags/*"]], // 태그 감지
+                        branches: [[name: "*/dev"]], // [변경] dev 브랜치만 감지
                         doGenerateSubmoduleConfigurations: false,
                         extensions: [],
-                        submoduleCfg: [],
-                        userRemoteConfigs: [[
-                            url: "${GIT_URL}",
-                            refspec: "+refs/tags/*:refs/tags/*" // 태그 가져오기
-                        ]]
+                        userRemoteConfigs: [[url: "${GIT_URL}"]]
                     ])
                 }
-            }
         }
 
         stage('Set Version & Docker Image Name') {
             steps {
                 script {
-//                     def versionFromTag = params.TAG.replace('origin/', '').trim()
-                    APP_VERSION = sh(script: "git describe --tags --abbrev=0", returnStdout: true).trim()
+                    // [변경] 최신 태그 자동 계산
+                    def lastTag = sh(script: "git describe --tags --abbrev=0 || echo v1.0.0", returnStdout: true).trim()
+                    def (major, minor, patch) = lastTag.replace('v','').tokenize('.')
+                    patch = (patch as int) + 1
+                    APP_VERSION = "v${major}.${minor}.${patch}"
 
                     if (params.RELEASE) {
                         APP_VERSION += '-RELEASE'
                         PROD_BUILD = true
+                    }
+
+                    // [변경] 새로운 태그 생성 및 푸시
+                    sshagent(credentials: [env.SSH_KEY_ID]) {
+                        sh """
+                            git config user.name "jenkins"
+                            git config user.email "jenkins@sf-deefacto.com"
+                            git tag ${APP_VERSION}
+                            git push origin ${APP_VERSION}
+                        """
                     }
 
                     withCredentials([file(credentialsId: 'deefacto-Alim-service-env', variable: 'ENV_FILE')]) {
