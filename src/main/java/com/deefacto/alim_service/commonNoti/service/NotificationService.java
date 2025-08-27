@@ -3,10 +3,12 @@ package com.deefacto.alim_service.commonNoti.service;
 import com.deefacto.alim_service.common.exception.CustomException;
 import com.deefacto.alim_service.common.exception.ErrorCode;
 import com.deefacto.alim_service.commonNoti.domain.dto.NotificationReadDTO;
+import com.deefacto.alim_service.commonNoti.domain.entity.NotificationUser;
 import com.deefacto.alim_service.commonNoti.repository.NotificationRepository;
 import com.deefacto.alim_service.commonNoti.repository.NotificationUserRepository;
 import com.deefacto.alim_service.remote.service.UserRequestProducer;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
@@ -37,7 +40,7 @@ public class NotificationService {
     public Integer updateReadStatus(Long userId, Long notiId) {
         // 1. 존재 여부 및 권한 확인
         notificationUserRepository.findByUserIdAndNotiId(userId, notiId)
-                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_INPUT));
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_INPUT, "잘못된 요청입니다. Wrong notiId"));
         // 2. 읽음 처리
         return notificationUserRepository.markNotificationAsRead(userId, notiId, OffsetDateTime.now());
     }
@@ -48,12 +51,15 @@ public class NotificationService {
     }
 
     // 알림 즐겨찾기/해제
-    public int toggleNotificationFlag(Long userId, Long notiId) {
+    public boolean toggleNotificationFlag(Long userId, Long notiId) {
         int updatedRows = notificationUserRepository.toggleFlagStatus(userId, notiId);
         if (updatedRows == 0) {
-            System.out.println("잘못된 요청입니다. (userId - notiId)");
-            throw new CustomException(ErrorCode.INVALID_INPUT);
+            log.warn("잘못된 요청입니다. (userId - notiId)");
+            throw new CustomException(ErrorCode.INVALID_INPUT, "잘못된 요청입니다. Wrong notiId");
+        } else {
+            NotificationUser nu = notificationUserRepository.findByUserIdAndNotiId(userId, notiId)
+                    .orElseThrow(() -> new CustomException(ErrorCode.INVALID_INPUT, "잘못된 요청입니다. Wrong notiId"));
+            return nu.getFlagStatus();
         }
-        return updatedRows;
     }
 }

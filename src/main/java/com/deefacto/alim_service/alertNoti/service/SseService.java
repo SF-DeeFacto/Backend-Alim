@@ -2,6 +2,8 @@ package com.deefacto.alim_service.alertNoti.service;
 
 import com.deefacto.alim_service.alertNoti.domain.dto.Alert;
 import com.deefacto.alim_service.alertNoti.domain.dto.ConnectedUser;
+import com.deefacto.alim_service.common.exception.CustomException;
+import com.deefacto.alim_service.common.exception.ErrorCode;
 import com.deefacto.alim_service.commonNoti.domain.entity.Notification;
 import com.deefacto.alim_service.commonNoti.repository.NotificationRepository;
 import com.deefacto.alim_service.commonNoti.service.NotificationUserService;
@@ -35,9 +37,13 @@ public class SseService {
         SseEmitter emitter = new SseEmitter(TIMEOUT);
         emitters.put(userId, emitter);
 
-        Set<String> zoneSet = Arrays.stream(userScope.split(","))
-                .map(String::trim)
-                .collect(Collectors.toSet());
+        Set<String> zoneSet = Optional.ofNullable(userScope)
+                .filter(s -> !s.isBlank())
+                .map(s -> Arrays.stream(s.split(","))
+                        .map(String::trim)
+                        .filter(str -> !str.isEmpty())
+                        .collect(Collectors.toSet()))
+                .orElse(Collections.emptySet());
 
         connectedUsers.put(userId, new ConnectedUser(userId, zoneSet, userShift));
 
@@ -57,13 +63,20 @@ public class SseService {
         try {
             emitter.send(SseEmitter.event().name("connect").data("connected"));
         } catch (IOException e) {
-            throw new RuntimeException("SSE 연결 실패", e);
+            remove(userId);
+            throw new CustomException(ErrorCode.EXTERNAL_SERVICE_ERROR,"SSE 외부 서비스 호출 중 오류가 발생했습니다.");
         }
 
-        // 누락 메시지 재전송
-        List<Alert> missedAlerts = alertRedisService.getAlertsAfter(lastEventId);
-        missedAlerts.forEach(alert -> sendAlert(alert)); // sendAlert 메소드 재사용
-
+        // 누락 메시지 재전송 (lastEventId 방어)
+        try {
+            if (lastEventId != null && !lastEventId.isBlank()) {
+                List<Alert> missedAlerts = alertRedisService.getAlertsAfter(lastEventId);
+                missedAlerts.forEach(this::sendAlert);
+            }
+        } catch (Exception e) {
+            log.error("Failed to resend missed alerts for userId={}, lastEventId={}, error={}",
+                    userId, lastEventId, e.getMessage(), e);
+        }
         return emitter;
     }
 
@@ -83,8 +96,10 @@ public class SseService {
             ConnectedUser user = connectedUsers.get(userId);
             if (user == null) continue;
 
+            // zone 매칭
             if (!user.getZoneIds().contains(String.valueOf(alertZone.charAt(0)))) continue;
 
+            // shift 확인
             OffsetDateTime alertTime = alert.getTimestamp();
             String shift = user.getUserShift();
             int hour = alertTime.getHour();
@@ -99,11 +114,18 @@ public class SseService {
 
             if (!isWithinShift) continue;
 
+            // 안전 전송
             try {
-                emitters.get(userId).send(
-                        SseEmitter.event().id(alert.getId()).name("alert").data(noti)
-                );
+                SseEmitter emitter = emitters.get(userId);
+                if (emitter != null) {
+                    emitter.send(SseEmitter.event().id(alert.getId()).name("alert").data(noti));
+                }
             } catch (IOException e) {
+                log.warn("SSE send failed (IO) for userId={}, alertId={}, removing emitter.", userId, alert.getId());
+                remove(userId);
+            } catch (Exception e) {
+                log.error("Unexpected error while sending SSE to userId={}, alertId={}, error={}",
+                        userId, alert.getId(), e.getMessage(), e);
                 remove(userId);
             }
         }

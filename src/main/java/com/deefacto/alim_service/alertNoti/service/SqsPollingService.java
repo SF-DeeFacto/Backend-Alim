@@ -66,6 +66,7 @@ public class SqsPollingService {
                 .build();
 
         List<Message> messages = sqsClient.receiveMessage(request).messages();
+        if (messages.isEmpty()) return;
 
         try {
             for (Message message : messages) {
@@ -77,20 +78,39 @@ public class SqsPollingService {
                         alert.setId(UUID.randomUUID().toString());
                     }
 
-                    log.info("!!!!!!!!!!!!!!!!Received SQS message: {}", alert);
+                    log.info("Received SQS message: {}", alert);
 
                     // Redis에 저장
-                    alertRedisService.saveAlert(alert);
+//                    try {
+                        alertRedisService.saveAlert(alert);
+//                    } catch (Exception e) {
+//                        log.error("Redis saveAlert failed rootCause={}, class={}",
+//                                e.getMessage(),
+//                                (e.getCause()!=null?e.getCause().getClass().getName():e.getClass().getName()), e);
+//                        log.error("Redis saveAlert failed for alertId={}", alert.getId(), e);
+//                        // 실패 시 메시지 삭제하지 않고 재시도 가능
+//                        continue;
+//                    }
 
-                    // SSE 구독자에게 전송
-                    sseService.sendAlert(alert);
+                    // SSE 전송
+                    try {
+                        sseService.sendAlert(alert);
+                    } catch (Exception e) {
+                        log.error("SSE sendAlert failed for alertId={}", alert.getId(), e);
+                        // 실패 시 메시지 삭제하지 않고 재시도 가능
+                        continue;
+                    }
 
                     // 메시지 삭제
-                    DeleteMessageRequest deleteRequest = DeleteMessageRequest.builder()
-                            .queueUrl(queueUrl)
-                            .receiptHandle(message.receiptHandle())
-                            .build();
-                    sqsClient.deleteMessage(deleteRequest);
+                    try {
+                        DeleteMessageRequest deleteRequest = DeleteMessageRequest.builder()
+                                .queueUrl(queueUrl)
+                                .receiptHandle(message.receiptHandle())
+                                .build();
+                        sqsClient.deleteMessage(deleteRequest);
+                    } catch (Exception e) {
+                        log.error("Failed to delete SQS message: {}", message.messageId(), e);
+                    }
 
                 } catch (Exception e) {
                     log.error("Failed to process SQS message: {}", e.getMessage(), e);

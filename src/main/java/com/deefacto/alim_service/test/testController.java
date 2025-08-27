@@ -14,6 +14,6 @@ public class testController {
     @GetMapping("/noti/test")
     public ApiResponseDto<String> reportKafkaTest() {
         reportProducer.requestAlimForStore();
-        return ApiResponseDto.createOk("test success");
+        return ApiResponseDto.createOk("test success", "리포트 kafka 알림 테스트 성공");
     }
 }

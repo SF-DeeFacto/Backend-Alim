@@ -13,19 +13,30 @@ import java.net.URI;
 @Configuration
 public class AwsConfig {
 
+    @Value("${aws.credentials.access-key}")
+    private String accessKey;
+
+    @Value("${aws.credentials.secret-key}")
+    private String secretKey;
+
     @Value("${aws.region}")
     private String region;
 
-    @Value("${aws.sqs.endpoint-url}")
-    private String endpoint;
+    // 🔥 Local SQS 사용 시
+//    @Value("${aws.sqs.endpoint-url}")
+//    private String endpoint;
 
     @Bean
     public SqsClient sqsClient() {
         return SqsClient.builder()
                 .region(Region.of(region))
-                .endpointOverride(URI.create(endpoint))  // 로컬 스택 주소
+                // 🔥 Local SQS 사용 시
+//                .endpointOverride(URI.create(endpoint))  // 로컬 스택 주소
                 .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create("test", "test")))
+                        AwsBasicCredentials.create(accessKey, secretKey)))
                 .build();
     }
+
+
+//주석 추가 -> jenkins 인식 테스트
 }

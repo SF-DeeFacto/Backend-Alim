@@ -8,6 +8,7 @@ import com.deefacto.alim_service.commonNoti.repository.NotificationRepository;
 import com.deefacto.alim_service.commonNoti.repository.NotificationUserRepository;
 import com.deefacto.alim_service.remote.service.UserRequestProducer;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationUserService {
@@ -68,7 +70,6 @@ public class NotificationUserService {
     // Notification 저장 및 NotiUser 저장 (Producer 기반 noti 정보 전달 시, user 정보 받아와 저장)
     // kafka(user) produce 호출함
     public Notification saveNotification(Notification notification) {
-        System.out.println("!!!!!!!!!!!!!!!!!!saveNotification 실행됨!!!!!!!!");
         int hour = notification.getTimestamp().getHour();
         String shift = "None";
         if(hour >= 7 && hour < 19) {
@@ -79,12 +80,14 @@ public class NotificationUserService {
 
         Notification result = notificationRepository.save(notification);
         userRequestProducer.requestUsersForNotification(result.getNotiId(), result.getZoneId(), shift);
+        log.info("Notification saved successfully");
         return result;
     }
 
     // 알림과 대상 사용자 리스트를 받아 각각 알림-사용자 row를 생성
     // kafka(user) consumer에서 호출됨
     public void assignNotificationToUsers(Long notificationId, List<Long> userIds) {
+        log.info("userId size: {}", userIds.size());
         List<NotificationUser> notificationUsers = userIds.stream()
                 .map(userId -> NotificationUser.builder()
                         .notiId(notificationId)
@@ -95,7 +98,7 @@ public class NotificationUserService {
                 .collect(Collectors.toList());
 
         notificationUserRepository.saveAll(notificationUsers);
-        System.out.println("notification_user data stored complete.");
+        log.info("notification_user data stored complete.");
     }
 
 
