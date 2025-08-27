@@ -84,6 +84,9 @@ public class SqsPollingService {
                     try {
                         alertRedisService.saveAlert(alert);
                     } catch (Exception e) {
+                        log.error("Redis saveAlert failed rootCause={}, class={}",
+                                e.getMessage(),
+                                (e.getCause()!=null?e.getCause().getClass().getName():e.getClass().getName()), e);
                         log.error("Redis saveAlert failed for alertId={}", alert.getId(), e);
                         // 실패 시 메시지 삭제하지 않고 재시도 가능
                         continue;
