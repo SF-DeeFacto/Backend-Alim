@@ -24,14 +24,14 @@ public class AlertRedisService {
     private static final String KEY_PREFIX = "alert:";
 
     public void saveAlert(Alert alert) {
-        try {
+//        try {
             String key = KEY_PREFIX + alert.getId();
             redisTemplate.opsForValue().set(key, alert, Duration.ofMinutes(5));
             log.info("Redis saved Successfully");
-        } catch (Exception e) {
-            // Redis 장애 → fallback 로그
-            throw new CustomException(ErrorCode.EXTERNAL_SERVICE_ERROR, "Redis saveAlert failed for alertId=" + alert.getId());
-        }
+//        } catch (Exception e) {
+//            // Redis 장애 → fallback 로그
+//            throw new CustomException(ErrorCode.EXTERNAL_SERVICE_ERROR, "Redis saveAlert failed for alertId=" + alert.getId());
+//        }
     }
 
     // 누락 메시지 재전송
