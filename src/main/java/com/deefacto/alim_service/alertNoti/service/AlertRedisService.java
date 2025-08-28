@@ -5,6 +5,7 @@ import com.deefacto.alim_service.common.exception.CustomException;
 import com.deefacto.alim_service.common.exception.ErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AlertRedisService {
@@ -21,19 +23,15 @@ public class AlertRedisService {
     private final RedisTemplate<String, Object> redisTemplate;
     private static final String KEY_PREFIX = "alert:";
 
-//    public void saveAlert(Alert alert) {
-//        String key = KEY_PREFIX + alert.getId();
-//        redisTemplate.opsForValue().set(key, alert, Duration.ofMinutes(5));
-//    }
-
     public void saveAlert(Alert alert) {
-        try {
+//        try {
             String key = KEY_PREFIX + alert.getId();
             redisTemplate.opsForValue().set(key, alert, Duration.ofMinutes(5));
-        } catch (Exception e) {
-            // Redis 장애 → fallback 로그
-            throw new CustomException(ErrorCode.EXTERNAL_SERVICE_ERROR, "Redis saveAlert failed for alertId=" + alert.getId());
-        }
+            log.info("Redis saved Successfully");
+//        } catch (Exception e) {
+//            // Redis 장애 → fallback 로그
+//            throw new CustomException(ErrorCode.EXTERNAL_SERVICE_ERROR, "Redis saveAlert failed for alertId=" + alert.getId());
+//        }
     }
 
     // 누락 메시지 재전송
