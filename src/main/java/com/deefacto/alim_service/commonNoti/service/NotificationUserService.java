@@ -10,6 +10,7 @@ import com.deefacto.alim_service.remote.service.UserRequestProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -49,6 +50,7 @@ public class NotificationUserService {
                 .build();
     }
 
+    // Report → Notification
     // kafka(report) consumer에서 호출됨
     public Notification convertReportToNotification(String zoneId, OffsetDateTime timestamp) {
         String formattedTime = timestamp != null
@@ -67,14 +69,14 @@ public class NotificationUserService {
                 .build();
     }
 
-    // Notification 저장 및 NotiUser 저장 (Producer 기반 noti 정보 전달 시, user 정보 받아와 저장)
-    // kafka(user) produce 호출함
+    // Notification save & Kafka(user) Producer 호출
+    @Transactional
     public Notification saveNotification(Notification notification) {
         int hour = notification.getTimestamp().getHour();
         String shift = "None";
-        if(hour >= 7 && hour < 19) {
+        if (hour >= 7 && hour < 19) {
             shift = "DAY";
-        } else if (hour >= 19 || hour < 7){
+        } else if (hour >= 19 || hour < 7) {
             shift = "NIGHT";
         }
 
@@ -84,8 +86,9 @@ public class NotificationUserService {
         return result;
     }
 
+    // Kafka(user) Consumer에서 호출 & Notification_User save
     // 알림과 대상 사용자 리스트를 받아 각각 알림-사용자 row를 생성
-    // kafka(user) consumer에서 호출됨
+    @Transactional
     public void assignNotificationToUsers(Long notificationId, List<Long> userIds) {
         log.info("userId size: {}", userIds.size());
         List<NotificationUser> notificationUsers = userIds.stream()
@@ -100,8 +103,4 @@ public class NotificationUserService {
         notificationUserRepository.saveAll(notificationUsers);
         log.info("notification_user data stored complete.");
     }
-
-
-
-
 }
