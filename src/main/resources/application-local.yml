@@ -35,10 +35,10 @@ spring:
         # 가독성을 위해 들여쓰기 적용
         format_sql: ${DEV_FORMAT_SQL:true}
 
-  redis:
-    host: ${REDIS_HOST:localhost}
-    port: ${REDIS_PORT:6379}
-    password: ${REDIS_PASSWORD:StrongPassword22!}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}

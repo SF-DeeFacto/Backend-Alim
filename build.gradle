@@ -32,7 +32,6 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'io.lettuce:lettuce-core'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
-	implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.10.2'
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 	implementation 'org.opensearch.client:opensearch-java:2.11.1'
 

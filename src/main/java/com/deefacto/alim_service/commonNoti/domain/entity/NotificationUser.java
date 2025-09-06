@@ -32,9 +32,11 @@ public class NotificationUser {
     @Column(name = "read_time")
     private OffsetDateTime readTime;
 
+    @Builder.Default
     @Column(name = "read_status", nullable = false)
     private Boolean readStatus = false;
 
+    @Builder.Default
     @Column(name = "flag_status", nullable = false)
     private Boolean flagStatus = false;
 }

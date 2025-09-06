@@ -17,31 +17,31 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisConfig {
 
-    @Value("${spring.redis.host}")
-    private String redisHost;
-
-    @Value("${spring.redis.port}")
-    private int redisPort;
+//    @Value("${spring.data.redis.host}")
+//    private String redisHost;
+//
+//    @Value("${spring.data.redis.port}")
+//    private int redisPort;
 
 //    @Value("${spring.redis.password}")
 //    private String redisPassword;
 
-    @Bean
-    public RedisConnectionFactory redisConnectionFactory() {
-        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-        config.setHostName(redisHost);
-        config.setPort(redisPort);
-//        if (redisPassword != null && !redisPassword.isEmpty()) {
-//            config.setPassword(redisPassword);
-//        }
-        // 2) Lettuce SSL 활성화
-        LettuceClientConfiguration clientConf =
-                LettuceClientConfiguration.builder()
-                        .useSsl()
-                        .build();
-
-        return new LettuceConnectionFactory(config, clientConf);
-    }
+//    @Bean
+//    public RedisConnectionFactory redisConnectionFactory() {
+//        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
+//        config.setHostName(redisHost);
+//        config.setPort(redisPort);
+////        if (redisPassword != null && !redisPassword.isEmpty()) {
+////            config.setPassword(redisPassword);
+////        }
+//        // 2) Lettuce SSL 활성화
+//        LettuceClientConfiguration clientConf =
+//                LettuceClientConfiguration.builder()
+//                        .useSsl()
+//                        .build();
+//
+//        return new LettuceConnectionFactory(config, clientConf);
+//    }
 
     // 일반 Object용 RedisTemplate
     @Bean
