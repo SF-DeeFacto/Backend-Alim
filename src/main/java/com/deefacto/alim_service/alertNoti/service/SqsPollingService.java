@@ -74,8 +74,11 @@ public class SqsPollingService {
             for (Message message : messages) {
                 try {
                     Alert alert = objectMapper.readValue(message.body(), Alert.class);
-                    OffsetDateTime utcTime = alert.getTimestamp().withOffsetSameInstant(ZoneOffset.UTC);
-                    alert.setTimestamp(utcTime);
+                    log.info("SQS ORIGIN TIME: {}", alert.getTimestamp());
+                    // timestamp를 항상 한국 시간 기준으로 변환
+                    OffsetDateTime koreaTime = alert.getTimestamp().withOffsetSameInstant(ZoneOffset.ofHours(9));
+                    alert.setTimestamp(koreaTime);
+                    log.info("UPDATE TIME: {}", alert.getTimestamp());
 
                     // UUID 없는 경우 생성
                     if (alert.getId() == null || alert.getId().isEmpty()) {
