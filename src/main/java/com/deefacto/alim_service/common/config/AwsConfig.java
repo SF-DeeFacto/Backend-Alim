@@ -8,8 +8,6 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsClient;
 
-import java.net.URI;
-
 @Configuration
 public class AwsConfig {
 
@@ -36,7 +34,4 @@ public class AwsConfig {
                         AwsBasicCredentials.create(accessKey, secretKey)))
                 .build();
     }
-
-
-//주석 추가 -> jenkins 인식 테스트
 }

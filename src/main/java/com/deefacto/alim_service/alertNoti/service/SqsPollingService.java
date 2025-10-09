@@ -12,6 +12,8 @@ import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 import software.amazon.awssdk.services.sqs.model.Message;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
@@ -72,6 +74,11 @@ public class SqsPollingService {
             for (Message message : messages) {
                 try {
                     Alert alert = objectMapper.readValue(message.body(), Alert.class);
+                    log.info("SQS ORIGIN TIME: {}", alert.getTimestamp());
+                    // timestamp를 항상 한국 시간 기준으로 변환
+                    OffsetDateTime koreaTime = alert.getTimestamp().withOffsetSameInstant(ZoneOffset.ofHours(9));
+                    alert.setTimestamp(koreaTime);
+                    log.info("UPDATE TIME: {}", alert.getTimestamp());
 
                     // UUID 없는 경우 생성
                     if (alert.getId() == null || alert.getId().isEmpty()) {

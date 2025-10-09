@@ -1,9 +1,6 @@
 package com.deefacto.alim_service.test;
 
 import com.deefacto.alim_service.remote.dto.ReportGeneratedEvent;
-import com.deefacto.alim_service.remote.dto.ReportGeneratedEvent;
-import com.deefacto.alim_service.remote.dto.UserMessage;
-import com.deefacto.alim_service.remote.service.ReportConsumer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;

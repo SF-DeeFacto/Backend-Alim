@@ -5,11 +5,11 @@ import com.deefacto.alim_service.alertNoti.domain.dto.ConnectedUser;
 import com.deefacto.alim_service.common.exception.CustomException;
 import com.deefacto.alim_service.common.exception.ErrorCode;
 import com.deefacto.alim_service.commonNoti.domain.entity.Notification;
-import com.deefacto.alim_service.commonNoti.repository.NotificationRepository;
 import com.deefacto.alim_service.commonNoti.service.NotificationUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
@@ -27,12 +27,12 @@ public class SseService {
 
     private final Map<String, SseEmitter> emitters = new ConcurrentHashMap<>();
     private final Map<String, ConnectedUser> connectedUsers = new ConcurrentHashMap<>();
-    private final NotificationRepository notificationRepository;
 
     private final NotificationUserService notificationUserService;
 
     private static final long TIMEOUT = 30 * 60 * 1000L; // 30분
 
+    // SSE 구독 (팝업 알림 구독)
     public SseEmitter subscribe(String userId, String userScope, String userShift, String lastEventId) {
         SseEmitter emitter = new SseEmitter(TIMEOUT);
         emitters.put(userId, emitter);
@@ -80,6 +80,7 @@ public class SseService {
         return emitter;
     }
 
+    // SSE 구독 해제 (팝업 알림 구독 끊기)
     private void remove(String userId) {
         emitters.remove(userId);
         connectedUsers.remove(userId);
@@ -89,8 +90,7 @@ public class SseService {
     public void sendAlert(Alert alert) {
         String alertZone = alert.getZoneId();
 
-        Notification receivedNoti = notificationUserService.convertAlertToNotification(alert);
-        Notification noti = notificationUserService.saveNotification(receivedNoti);
+        Notification noti = saveAlert(alert);
 
         for (String userId : emitters.keySet()) {
             ConnectedUser user = connectedUsers.get(userId);
@@ -129,6 +129,13 @@ public class SseService {
                 remove(userId);
             }
         }
+    }
+
+    // DB 적재 (Notification Table)
+    @Transactional
+    private Notification saveAlert(Alert alert) {
+        Notification receivedNoti = notificationUserService.convertAlertToNotification(alert);
+        return notificationUserService.saveNotification(receivedNoti);
     }
 }
 

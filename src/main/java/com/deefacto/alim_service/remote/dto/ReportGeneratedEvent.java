@@ -1,6 +1,5 @@
 package com.deefacto.alim_service.remote.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
